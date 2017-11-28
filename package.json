@@ -1,7 +1,7 @@
 {
   "name": "najadojo-gltf-import-export",
   "version": "1.0.0",
-  "description": "A Node.js module to convert between GLB and GLTF files.",
+  "description": "Convert between GLB and GLTF files",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
