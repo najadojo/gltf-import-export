@@ -1,6 +1,8 @@
 # gltf-import-export
 Convert between GLB and GLTF files.
 
+NPM package: https://www.npmjs.com/package/gltf-import-export
+
 The glTF 3D model format comes in two varieties: *.gltf is a JSON-based text file. *.glb is a binary version, typically smaller and self-contained.
 
 `ConvertGLBtoGltf` will export your text-based glTF to a binary .glb file. In the exported version, whitespace in the JSON is stripped out, external file references are read in and converted to GLB binary chunks, and the resulting file becomes a self-contained transportable file that can be easily shared.
