@@ -1,0 +1,34 @@
+{
+  "name": "gltf-import-export",
+  "version": "1.0.0",
+  "description": "Convert between GLB and GLTF files",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/najadojo/gltf-import-export.git"
+  },
+  "keywords": [
+    "GLTF",
+    "GLB",
+    "convert",
+    "import",
+    "export"
+  ],
+  "author": "Jamie Marconi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/najadojo/gltf-import-export/issues"
+  },
+  "homepage": "https://github.com/najadojo/gltf-import-export#readme",
+  "devDependencies": {
+    "@types/node": "^7.0.12",
+    "tslint": "^5.0.0",
+    "typescript": "^2.6.2"
+  }
+}
