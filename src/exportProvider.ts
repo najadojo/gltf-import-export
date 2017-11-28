@@ -51,13 +51,13 @@ function dataFromUri(buffer: any, basePath: string) : { mimeType: string, buffer
         }
     }
     else {
-        const fullUri = Url.resolve(basePath, buffer.uri);
+        const fullUri = decodeURI(Url.resolve(basePath, buffer.uri));
         let mimeType = guessMimeType(fullUri)
         return { mimeType: mimeType, buffer: fs.readFileSync(fullUri) };
     }
 }
 
-function getBuffer(glTF:any, bufferIndex: string, basePath: string): Buffer | null {
+export function getBuffer(glTF: any, bufferIndex: string, basePath: string): Buffer | null {
     let gltfBuffer = glTF.buffers[bufferIndex];
     let data = dataFromUri(gltfBuffer, basePath);
     if (data != null) {

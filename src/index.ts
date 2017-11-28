@@ -1,3 +1,3 @@
 'use strict';
-export { ConvertGltfToGLB, ConvertToGLB } from './exportProvider';
+export { ConvertGltfToGLB, ConvertToGLB, getBuffer } from './exportProvider';
 export { ConvertGLBtoGltf } from './importProvider';

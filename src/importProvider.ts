@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { alignedLength, guessFileExtension } from './exportProvider';
 
-export async function ConvertGLBtoGltf(sourceFilename: string, targetFilename: string) {
+export function ConvertGLBtoGltf(sourceFilename: string, targetFilename: string) {
     if (typeof sourceFilename == 'undefined') {
         return;
     }
