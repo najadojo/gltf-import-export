@@ -4,9 +4,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { alignedLength, guessFileExtension } from './exportProvider';
 
-export function ConvertGLBtoGltf(sourceFilename: string, targetFilename: string) {
+function readSourceFile(sourceFilename: string) : Buffer {
     if (typeof sourceFilename == 'undefined') {
-        return;
+        throw new Error('Input file undefined.');
     }
     if (!fs.existsSync(sourceFilename)) {
         throw new Error('File not found.');
@@ -27,6 +27,41 @@ export function ConvertGLBtoGltf(sourceFilename: string, targetFilename: string)
         throw new Error('Only GLB version 2 is supported for import. Detected version: ' + readVersion);
     }
 
+    return sourceBuf;
+}
+
+/**
+ * Convert GLB -> glTF; overwrites any existing files.
+ *
+ * @param sourceFilename input glb filename
+ * @param targetFilename output glTF filename
+ */
+export function ConvertGLBtoGltf(sourceFilename: string, targetFilename: string) {
+    const sourceBuf = readSourceFile(sourceFilename);
+    doConversion(sourceBuf, targetFilename);
+}
+
+/**
+ * This form of GLB -> glTF convert function will open and validate the input filename
+ * before calling the parameter function to get a filename for output. This is allows
+ * a UI to query a customer for a filename when its expected that the conversion will
+ * succeed. 
+ *
+ * @param sourceFilename input glb filename
+ * @param getTargetFilenane async function that will return the output gltf filename
+ * @returns the output filename
+ */
+export async function ConvertGLBtoGltfLoadFirst(sourceFilename: string, getTargetFilename: () => Promise<string>) : Promise<string> {
+    const sourceBuf = readSourceFile(sourceFilename);
+    const targetFilename = await getTargetFilename();
+    if (targetFilename != null) {
+        doConversion(sourceBuf, targetFilename);
+    }
+
+    return targetFilename;
+}
+
+function doConversion(sourceBuf: Buffer, targetFilename: string) {
     // Strip off the '.glb' or other file extension, for use as a base name for external assets.
     let targetBasename = targetFilename;
     if (path.extname(targetFilename).length > 1) {

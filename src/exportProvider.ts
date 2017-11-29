@@ -10,13 +10,23 @@ const gltfMimeTypes: any = {
     'text/plain' : ['glsl', 'vert', 'vs', 'frag', 'fs', 'txt']
 };
 
-export function guessFileExtension(mimeType: string) {
+/**
+ * Provide a file extension from a mimeType.
+ *
+ * @param mimeType
+ */
+export function guessFileExtension(mimeType: string): string {
     if (gltfMimeTypes.hasOwnProperty(mimeType)) {
         return '.' + gltfMimeTypes[mimeType][0];
     }
     return '.bin';
 }
 
+/**
+ * Provide a mimeType from a filename using the file extension.
+ *
+ * @param filename
+ */
 export function guessMimeType(filename : string): string {
     for (const mimeType in gltfMimeTypes) {
         for (const extensionIndex in gltfMimeTypes[mimeType]) {
@@ -57,6 +67,13 @@ function dataFromUri(buffer: any, basePath: string) : { mimeType: string, buffer
     }
 }
 
+/**
+ * Provide a file extension from a mimeType.
+ *
+ * @param glTF result of JSON.parse of the glTF file contents
+ * @param bufferIndex index into the buffers array
+ * @param basePath path name in which the buffer file will be present.
+ */
 export function getBuffer(glTF: any, bufferIndex: string, basePath: string): Buffer | null {
     let gltfBuffer = glTF.buffers[bufferIndex];
     let data = dataFromUri(gltfBuffer, basePath);
@@ -66,6 +83,11 @@ export function getBuffer(glTF: any, bufferIndex: string, basePath: string): Buf
     return null;
 }
 
+/**
+ * Round the input number up to the next multiple of 4.
+ *
+ * @param value number to round
+ */
 export function alignedLength(value: number) : number
 {
     const alignValue = 4;
@@ -81,12 +103,27 @@ export function alignedLength(value: number) : number
     return value + (alignValue - multiple);
 }
 
+/**
+ * Convert glTF -> GLB; overwrites any existing file.
+ *
+ * @param sourceFilename input glTF filename
+ * @param outputFilename output GLB filename
+ */
 export function ConvertGltfToGLB(sourceFilename: string, outputFilename: string) {
     const gltfContent = fs.readFileSync(sourceFilename, 'utf8');
     let gltf = JSON.parse(gltfContent);
     ConvertToGLB(gltf, sourceFilename, outputFilename);
 }
 
+/**
+ * Convert glTF -> GLB; overwrites any existing file.
+ * 
+ * This form uses previously parsed gltf data.
+ *
+ * @param gltf result of JSON.parse of the glTF file contents
+ * @param sourceFilename input glTF filename
+ * @param outputFilename output GLB filename
+ */
 export function ConvertToGLB(gltf: any, sourceFilename: string, outputFilename: string) {
     const Binary = {
         Magic: 0x46546C67
