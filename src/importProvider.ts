@@ -79,7 +79,7 @@ function doConversion(sourceBuf: Buffer, targetFilename: string) {
     // returns any image objects for the given bufferView index if the buffer view is an image
     function findImagesForBufferView(bufferViewIndex: number) : Array<any> {
         if (gltf.images !== undefined && gltf.images instanceof Array) {
-            return gltf.images.filter((i : any) => i.bufferView === bufferViewIndex)
+            return gltf.images.filter((i : any) => i.bufferView === bufferViewIndex);
         }
         return [];
     }
@@ -106,7 +106,7 @@ function doConversion(sourceBuf: Buffer, targetFilename: string) {
     // returns any shaders for the given bufferView index if the buffer view is an image
     function findShadersForBufferView(bufferViewIndex: number) : Array<any> {
         if (gltf.shaders !== undefined && gltf.shaders instanceof Array) {
-            return gltf.shaders.filter((s : any) => s.bufferView === bufferViewIndex)
+            return gltf.shaders.filter((s : any) => s.bufferView === bufferViewIndex);
         }
         return [];
     }
