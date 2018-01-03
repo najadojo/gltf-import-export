@@ -45,7 +45,7 @@ export function ConvertGLBtoGltf(sourceFilename: string, targetFilename: string)
  * This form of GLB -> glTF convert function will open and validate the input filename
  * before calling the parameter function to get a filename for output. This is allows
  * a UI to query a customer for a filename when its expected that the conversion will
- * succeed. 
+ * succeed.
  *
  * @param sourceFilename input glb filename
  * @param getTargetFilenane async function that will return the output gltf filename
@@ -76,46 +76,43 @@ function doConversion(sourceBuf: Buffer, targetFilename: string) {
     let gltf = JSON.parse(jsonString);
     const binBuffer = sourceBuf.slice(jsonBufSize + 28);
 
-    // returns the image object for the given bufferView index if the buffer view is an image
-    function findImageBuf(bufferViewIndex: number) : any {
-        if (gltf.images !== undefined) {
-            for (let image of gltf.images) {
-                if (image.bufferView == bufferViewIndex) {
-                    return image;
-                }
-            }
+    // returns any image objects for the given bufferView index if the buffer view is an image
+    function findImagesForBufferView(bufferViewIndex: number) : Array<any> {
+        if (gltf.images !== undefined && gltf.images instanceof Array) {
+            return gltf.images.filter((i : any) => i.bufferView === bufferViewIndex);
         }
+        return [];
     }
 
     // writes to the filesystem image data from the parameters
-    function writeImageBuf(imageBuf: any, bufferViewIndex: number, buf: Buffer) {
+    function writeImageBuf(images: Array<any>, bufferViewIndex: number, buf: Buffer) {
         let view = gltf.bufferViews[bufferViewIndex];
         const offset: number = view.byteOffset === undefined ? 0 : view.byteOffset;
         const length: number = view.byteLength;
 
-        let extension = guessFileExtension(imageBuf.mimeType);
-        let imageIndex = gltf.images.indexOf(imageBuf);
+        let firstReference = images[0];
+        let extension = guessFileExtension(firstReference.mimeType);
+        let imageIndex = gltf.images.indexOf(firstReference);
         let filename = targetBasename + '_img' + imageIndex.toString() + extension;
         fs.writeFileSync(filename, buf.slice(offset, offset + length), 'binary');
 
-        delete imageBuf.bufferView;
-        delete imageBuf.mimeType;
-        imageBuf.uri = path.basename(filename);
+        images.forEach(image => {
+            delete image.bufferView;
+            delete image.mimeType;
+            image.uri = path.basename(filename);
+        });
     }
 
-    // returns the shader object for the given bufferView index if the buffer view is a shader
-    function findShaderBuf(bufferViewIndex: number) : any {
-        if (gltf.shaders !== undefined) {
-            for (let shader of gltf.shaders) {
-                if (shader.bufferView == bufferViewIndex) {
-                    return shader;
-                }
-            }
+    // returns any shaders for the given bufferView index if the buffer view is an image
+    function findShadersForBufferView(bufferViewIndex: number) : Array<any> {
+        if (gltf.shaders !== undefined && gltf.shaders instanceof Array) {
+            return gltf.shaders.filter((s : any) => s.bufferView === bufferViewIndex);
         }
+        return [];
     }
 
     // writes to the filesystem shader data from the parameters
-    function writeShaderBuf(shaderBuf: any, bufferViewIndex: number, buf: Buffer) {
+    function writeShaderBuf(shaders: Array<any>, bufferViewIndex: number, buf: Buffer) {
         let view = gltf.bufferViews[bufferViewIndex];
         const offset: number = view.byteOffset === undefined ? 0 : view.byteOffset;
         const length: number = view.byteLength;
@@ -123,19 +120,22 @@ function doConversion(sourceBuf: Buffer, targetFilename: string) {
         let extension = '.glsl';
         const GL_VERTEX_SHADER_ARB = 0x8B31;
         const GL_FRAGMENT_SHADER_ARB = 0x8B30;
-        if (shaderBuf.type == GL_VERTEX_SHADER_ARB) {
+        let firstReference = shaders[0];
+        if (firstReference.type == GL_VERTEX_SHADER_ARB) {
             extension = '.vert';
-        } else if (shaderBuf.type == GL_FRAGMENT_SHADER_ARB) {
+        } else if (firstReference.type == GL_FRAGMENT_SHADER_ARB) {
             extension = '.frag';
         }
-        let shaderIndex = gltf.shaders.indexOf(shaderBuf);
+        let shaderIndex = gltf.shaders.indexOf(firstReference);
         let filename = targetBasename + '_shader' + shaderIndex.toString() + extension;
 
         fs.writeFileSync(filename, buf.slice(offset, offset + length), 'binary');
 
-        delete shaderBuf.bufferView;
-        delete shaderBuf.mimeType;
-        shaderBuf.uri = path.basename(filename);
+        shaders.forEach(shader => {
+            delete shader.bufferView;
+            delete shader.mimeType;
+            shader.uri = path.basename(filename);
+        });
     }
 
     // data the represents the buffers that are neither images or shaders
@@ -161,15 +161,15 @@ function doConversion(sourceBuf: Buffer, targetFilename: string) {
     // go through all the buffer views and break out buffers as separate files
     if (gltf.bufferViews !== undefined) {
         for (let bufferViewIndex = 0; bufferViewIndex < gltf.bufferViews.length; bufferViewIndex++) {
-            let imageBuf = findImageBuf(bufferViewIndex);
-            if (imageBuf !== undefined) {
-                writeImageBuf(imageBuf, bufferViewIndex, binBuffer);
+            let images = findImagesForBufferView(bufferViewIndex);
+            if (images.length > 0) {
+                writeImageBuf(images, bufferViewIndex, binBuffer);
                 continue;
             }
 
-            let shaderBuf = findShaderBuf(bufferViewIndex);
-            if (shaderBuf !== undefined) {
-                writeShaderBuf(shaderBuf, bufferViewIndex, binBuffer);
+            let shaders = findShadersForBufferView(bufferViewIndex);
+            if (shaders.length > 0) {
+                writeShaderBuf(shaders, bufferViewIndex, binBuffer);
                 continue;
             }
 
