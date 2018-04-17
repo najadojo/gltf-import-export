@@ -27,8 +27,8 @@
   },
   "homepage": "https://github.com/najadojo/gltf-import-export#readme",
   "devDependencies": {
-    "@types/node": "^7.0.12",
-    "tslint": "^5.0.0",
-    "typescript": "^2.6.2"
+    "@types/node": "^7.0.61",
+    "tslint": "^5.9.1",
+    "typescript": "^2.8.1"
   }
 }
