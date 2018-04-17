@@ -7,8 +7,14 @@ const gltfMimeTypes: any = {
     'image/png' : ['png'],
     'image/jpeg' : ['jpg', 'jpeg'],
     'image/vnd-ms.dds' : ['dds'],
-    'text/plain' : ['glsl', 'vert', 'vs', 'frag', 'fs', 'txt']
+    'text/plain' : ['glsl', 'vert', 'vs', 'frag', 'fs', 'txt'],
+    'audio/wav' : ['wav']
 };
+
+interface IUriData {
+    mimeType: string;
+    buffer: Buffer;
+}
 
 /**
  * Provide a file extension from a mimeType.
@@ -47,7 +53,7 @@ function decodeBase64(uri: string): Buffer {
     return Buffer.from(uri.split(',')[1], 'base64');
 }
 
-function dataFromUri(buffer: any, basePath: string): { mimeType: string, buffer: Buffer } | null {
+function dataFromUri(buffer: any, basePath: string): IUriData | null {
     if (buffer.uri == null) {
         return null;
     }
@@ -131,7 +137,7 @@ export function ConvertToGLB(gltf: any, sourceFilename: string, outputFilename: 
     const bufferMap = new Map<number, number>();
 
     let bufferOffset = 0;
-    const outputBuffers = [];
+    const outputBuffers: Buffer[] = [];
     let bufferIndex = 0;
     // Get current buffers already defined in bufferViews
     for (; bufferIndex < gltf.buffers.length; bufferIndex++) {
@@ -151,7 +157,27 @@ export function ConvertToGLB(gltf: any, sourceFilename: string, outputFilename: 
         bufferView.buffer = 0;
     }
 
-    if (gltf.images !== undefined) {
+    const convertToBufferView = (buffer: any, data: IUriData) => {
+        const bufferView = {
+            buffer: 0,
+            byteOffset: bufferOffset,
+            byteLength: data.buffer.length,
+        };
+
+        bufferMap.set(bufferIndex, bufferOffset);
+        bufferIndex++;
+        bufferOffset += alignedLength(data.buffer.length);
+
+        const bufferViewIndex = gltf.bufferViews.length;
+        gltf.bufferViews.push(bufferView);
+        outputBuffers.push(data.buffer);
+
+        buffer['bufferView'] = bufferViewIndex;
+        buffer['mimeType'] = data.mimeType;
+        delete buffer['uri'];
+    };
+
+    if (gltf.images) {
         for (const image of gltf.images) {
             const data = dataFromUri(image, sourceFilename);
             if (data == null) {
@@ -159,27 +185,11 @@ export function ConvertToGLB(gltf: any, sourceFilename: string, outputFilename: 
                 continue;
             }
 
-            const bufferView = {
-                buffer: 0,
-                byteOffset: bufferOffset,
-                byteLength: data.buffer.length,
-            };
-
-            bufferMap.set(bufferIndex, bufferOffset);
-            bufferIndex++;
-            bufferOffset += alignedLength(data.buffer.length);
-
-            const bufferViewIndex = gltf.bufferViews.length;
-            gltf.bufferViews.push(bufferView);
-            outputBuffers.push(data.buffer);
-
-            image['bufferView'] = bufferViewIndex;
-            image['mimeType'] = data.mimeType;
-            delete image['uri'];
+            convertToBufferView(image, data);
         }
     }
 
-    if (gltf.shaders !== undefined) {
+    if (gltf.shaders) {
         for (const shader of gltf.shaders) {
             const data = dataFromUri(shader, sourceFilename);
             if (data == null) {
@@ -187,23 +197,26 @@ export function ConvertToGLB(gltf: any, sourceFilename: string, outputFilename: 
                 continue;
             }
 
-            const bufferView = {
-                buffer: 0,
-                byteOffset: bufferOffset,
-                byteLength: data.buffer.length,
-            };
+            convertToBufferView(shader, data);
+        }
+    }
 
-            bufferMap.set(bufferIndex, bufferOffset);
-            bufferIndex++;
-            bufferOffset += alignedLength(data.buffer.length);
+    if (gltf.extensions) {
+        for (const extensionName in gltf.extensions) {
+            const extension = gltf.extensions[extensionName];
+            for (const extensionPropertyName in extension) {
+                const extensionProperty = extension[extensionPropertyName];
+                if (extensionProperty instanceof Array) {
+                    for (const buffer of extensionProperty) {
+                        const data = dataFromUri(buffer, sourceFilename);
+                        if (data == null) {
+                            continue;
+                        }
 
-            const bufferViewIndex = gltf.bufferViews.length;
-            gltf.bufferViews.push(bufferView);
-            outputBuffers.push(data.buffer);
-
-            shader['bufferView'] = bufferViewIndex;
-            shader['mimeType'] = data.mimeType;
-            delete shader['uri'];
+                        convertToBufferView(buffer, data);
+                    }
+                }
+            }
         }
     }
 

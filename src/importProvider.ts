@@ -103,9 +103,9 @@ function doConversion(sourceBuf: Buffer, targetFilename: string) {
         });
     }
 
-    // returns any shaders for the given bufferView index if the buffer view is an image
+    // returns any shaders for the given bufferView index if the buffer view is a shader
     function findShadersForBufferView(bufferViewIndex: number): Array<any> {
-        if (gltf.shaders !== undefined && gltf.shaders instanceof Array) {
+        if (gltf.shaders && gltf.shaders instanceof Array) {
             return gltf.shaders.filter((s: any) => s.bufferView === bufferViewIndex);
         }
         return [];
@@ -138,6 +138,23 @@ function doConversion(sourceBuf: Buffer, targetFilename: string) {
         });
     }
 
+    function writeExtensionBuffer(buffers: Array<any>, bufferViewIndex: number, buf: Buffer, extensionName: string) {
+        const view = gltf.bufferViews[bufferViewIndex];
+        const offset: number = view.byteOffset === undefined ? 0 : view.byteOffset;
+        const length: number = view.byteLength;
+
+        const firstReference = buffers[0];
+        const extension = guessFileExtension(firstReference.mimeType);
+        const filename = targetBasename + '_' + extensionName + '_' + bufferViewIndex.toString() + extension;
+        fs.writeFileSync(filename, buf.slice(offset, offset + length), 'binary');
+
+        buffers.forEach(buffer => {
+            delete buffer.bufferView;
+            delete buffer.mimeType;
+            buffer.uri = path.basename(filename);
+        });
+    }
+
     // data the represents the buffers that are neither images or shaders
     const bufferViewList: number[] = [];
     const bufferDataList: Buffer[] = [];
@@ -159,7 +176,7 @@ function doConversion(sourceBuf: Buffer, targetFilename: string) {
     }
 
     // go through all the buffer views and break out buffers as separate files
-    if (gltf.bufferViews !== undefined) {
+    if (gltf.bufferViews) {
         for (let bufferViewIndex = 0; bufferViewIndex < gltf.bufferViews.length; bufferViewIndex++) {
             const images = findImagesForBufferView(bufferViewIndex);
             if (images.length > 0) {
@@ -171,6 +188,23 @@ function doConversion(sourceBuf: Buffer, targetFilename: string) {
             if (shaders.length > 0) {
                 writeShaderBuf(shaders, bufferViewIndex, binBuffer);
                 continue;
+            }
+
+            if (gltf.extensions) {
+                for (const extensionName in gltf.extensions) {
+                    const extension = gltf.extensions[extensionName];
+                    for (const extensionPropertyName in extension) {
+                        const extensionProperty = extension[extensionPropertyName];
+                        if (extensionProperty instanceof Array) {
+                            const buffers = extensionProperty.filter((b: any) => b.bufferView === bufferViewIndex);
+                            if (buffers.length > 0) {
+                                const bufferName = extensionName + '_' + extensionPropertyName;
+                                writeExtensionBuffer(buffers, bufferViewIndex, binBuffer, bufferName);
+                                continue;
+                            }
+                        }
+                    }
+                }
             }
 
             addToBinaryBuf(bufferViewIndex, binBuffer);
