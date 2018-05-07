@@ -138,21 +138,41 @@ function doConversion(sourceBuf: Buffer, targetFilename: string) {
         });
     }
 
-    function writeExtensionBuffer(buffers: Array<any>, bufferViewIndex: number, buf: Buffer, extensionName: string) {
+    function writeExtensionBuffer(buffers: { 'buffer': any, 'name': string }[], bufferViewIndex: number, buf: Buffer) {
         const view = gltf.bufferViews[bufferViewIndex];
         const offset: number = view.byteOffset === undefined ? 0 : view.byteOffset;
         const length: number = view.byteLength;
 
         const firstReference = buffers[0];
-        const extension = guessFileExtension(firstReference.mimeType);
-        const filename = targetBasename + '_' + extensionName + '_' + bufferViewIndex.toString() + extension;
+        const extension = guessFileExtension(firstReference.buffer.mimeType);
+        const filename = targetBasename + '_' + firstReference.name + '_' + bufferViewIndex.toString() + extension;
         fs.writeFileSync(filename, buf.slice(offset, offset + length), 'binary');
 
         buffers.forEach(buffer => {
-            delete buffer.bufferView;
-            delete buffer.mimeType;
-            buffer.uri = path.basename(filename);
+            delete buffer.buffer.bufferView;
+            delete buffer.buffer.mimeType;
+            buffer.buffer.uri = path.basename(filename);
         });
+    }
+
+    function findExtensionBuffers(gltf: any, bufferViewIndex: number): { 'buffer': any, 'name': string }[] {
+        const buffers = [];
+        if (gltf.extensions) {
+            for (const extensionName in gltf.extensions) {
+                const extension = gltf.extensions[extensionName];
+                for (const extensionPropertyName in extension) {
+                    const extensionProperty = extension[extensionPropertyName];
+                    if (extensionProperty instanceof Array) {
+                        const bufferName = extensionName + '_' + extensionPropertyName;
+                        const curBuffers = extensionProperty.filter((b: any) => b.bufferView === bufferViewIndex);
+                        for (const buffer in curBuffers) {
+                            buffers.push({'buffer': curBuffers[buffer], 'name': bufferName});
+                        }
+                    }
+                }
+            }
+        }
+        return buffers;
     }
 
     // data the represents the buffers that are neither images or shaders
@@ -190,21 +210,10 @@ function doConversion(sourceBuf: Buffer, targetFilename: string) {
                 continue;
             }
 
-            if (gltf.extensions) {
-                for (const extensionName in gltf.extensions) {
-                    const extension = gltf.extensions[extensionName];
-                    for (const extensionPropertyName in extension) {
-                        const extensionProperty = extension[extensionPropertyName];
-                        if (extensionProperty instanceof Array) {
-                            const buffers = extensionProperty.filter((b: any) => b.bufferView === bufferViewIndex);
-                            if (buffers.length > 0) {
-                                const bufferName = extensionName + '_' + extensionPropertyName;
-                                writeExtensionBuffer(buffers, bufferViewIndex, binBuffer, bufferName);
-                                continue;
-                            }
-                        }
-                    }
-                }
+            const buffers = findExtensionBuffers(gltf, bufferViewIndex);
+            if (buffers.length > 0) {
+                writeExtensionBuffer(buffers, bufferViewIndex, binBuffer);
+                continue;
             }
 
             addToBinaryBuf(bufferViewIndex, binBuffer);
