@@ -21,7 +21,7 @@ The functions take a parameter for the base .gltf/.glb output filename only. The
 ## Usage
 
 ```javascript
-import { ConvertGLBtoGltf, ConvertGltfToGLB, ConvertToGLB} from 'najadojo-gltf-import-export';
+import { ConvertGLBtoGltf, ConvertGltfToGLB, ConvertToGLB} from 'gltf-import-export';
 
 const inputGlb = 'pathtoyour.glb';
 const extractedGltfFilename = 'newfile.gltf';
@@ -42,3 +42,14 @@ const gltfFilename = 'pathtoyour.gltf';
 // optionally if you haven't already parsed the gltf JSON
 ConvertGltfToGLB(gltfFilename, outputGlb);
 ```
+
+## Command line tool
+Takes a .glb and exports to a .gltf or takes a .gltf and imports into a .glb.
+```
+Usage: gltf-import-export <file> [options]
+
+Options:
+  --version     Show version number                                    [boolean]
+  --output, -o  Output filename
+  --help, -h    Show help                                              [boolean]
+  ```
