@@ -260,6 +260,16 @@ function doConversion(sourceBuf: Buffer, targetFilename: string) {
         }
     }
 
+    if (gltf.meshes) {
+        for (const mesh of gltf.meshes) {
+            for (const primitive of mesh.primitives) {
+                if (primitive.extensions && primitive.extensions.KHR_draco_mesh_compression) {
+                    primitive.extensions.KHR_draco_mesh_compression.bufferView = getNewBufferViewIndex(primitive.extensions.KHR_draco_mesh_compression.bufferView);
+                }
+            }
+        }
+    }
+
     const binFilename = targetBasename + '_data.bin';
     const finalBuffer = Buffer.concat(bufferDataList);
     fs.writeFileSync(binFilename, finalBuffer, 'binary');
