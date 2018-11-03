@@ -1,5 +1,4 @@
 'use strict';
-import * as Url from 'url';
 import * as fs from 'fs';
 import * as path from 'path';
 import { alignedLength, guessFileExtension } from './exportProvider';
