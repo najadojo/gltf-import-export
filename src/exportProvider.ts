@@ -1,7 +1,6 @@
 'use strict';
 import * as Url from 'url';
 import * as fs from 'fs';
-import * as path from 'path';
 
 const gltfMimeTypes: any = {
     'image/png' : ['png'],
@@ -80,7 +79,7 @@ function dataFromUri(buffer: any, basePath: string): IUriData | null {
  * @param bufferIndex index into the buffers array
  * @param basePath path name in which the buffer file will be present.
  */
-export function getBuffer(glTF: any, bufferIndex: string, basePath: string): Buffer | null {
+export function getBuffer(glTF: any, bufferIndex: number, basePath: string): Buffer | null {
     const gltfBuffer = glTF.buffers[bufferIndex];
     const data = dataFromUri(gltfBuffer, basePath);
     if (data != null) {
