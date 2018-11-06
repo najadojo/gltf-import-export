@@ -79,13 +79,15 @@ function dataFromUri(buffer: any, basePath: string): IUriData | null {
  * @param bufferIndex index into the buffers array
  * @param basePath path name in which the buffer file will be present.
  */
-export function getBuffer(glTF: any, bufferIndex: number, basePath: string): Buffer | null {
+export function getBuffer(glTF: any, bufferIndex: number, basePath: string, binBuffer: Buffer | null = null): Buffer | null {
     const gltfBuffer = glTF.buffers[bufferIndex];
     const data = dataFromUri(gltfBuffer, basePath);
     if (data != null) {
         return data.buffer;
     }
-    return null;
+    else {
+        return binBuffer;
+    }
 }
 
 /**

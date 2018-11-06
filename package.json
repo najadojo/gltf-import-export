@@ -1,6 +1,6 @@
 {
   "name": "gltf-import-export",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Convert between GLB and GLTF files",
   "main": "dist/index.js",
   "bin": "dist/tool.js",
