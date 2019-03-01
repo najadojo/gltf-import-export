@@ -5,6 +5,7 @@ import * as fs from 'fs';
 const gltfMimeTypes: any = {
     'image/png' : ['png'],
     'image/jpeg' : ['jpg', 'jpeg'],
+    'image/webp' : ['webp'],
     'image/vnd-ms.dds' : ['dds'],
     'text/plain' : ['glsl', 'vert', 'vs', 'frag', 'fs', 'txt'],
     'audio/wav' : ['wav']
