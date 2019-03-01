@@ -31,9 +31,9 @@
     "yargs": "^11.1.0"
   },
   "devDependencies": {
-    "@types/node": "^7.10.1",
+    "@types/node": "^7.10.3",
     "@types/yargs": "^11.1.2",
-    "tslint": "^5.11.0",
+    "tslint": "^5.13.1",
     "typescript": "^2.9.2"
   }
 }
