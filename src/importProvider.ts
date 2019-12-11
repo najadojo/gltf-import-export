@@ -266,10 +266,10 @@ function doConversion(sourceBuf: Buffer, pathBase: string, targetFilename: strin
             }
             if (accessor.sparse) {
                 if (accessor.sparse.indices && accessor.sparse.indices.bufferView !== undefined) {
-                    accessor.bufferView.indices.bufferView = getNewBufferViewIndex(accessor.bufferView.indices.bufferView);
+                    accessor.sparse.indices.bufferView = getNewBufferViewIndex(accessor.sparse.indices.bufferView);
                 }
                 if (accessor.sparse.values && accessor.sparse.values.bufferView !== undefined) {
-                    accessor.bufferView.values.bufferView = getNewBufferViewIndex(accessor.bufferView.values.bufferView);
+                    accessor.sparse.values.bufferView = getNewBufferViewIndex(accessor.sparse.values.bufferView);
                 }
             }
         }
