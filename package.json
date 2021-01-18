@@ -1,6 +1,6 @@
 {
   "name": "gltf-import-export",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "Convert between GLB and GLTF files",
   "main": "dist/index.js",
   "bin": "dist/tool.js",
@@ -28,12 +28,12 @@
   },
   "homepage": "https://github.com/najadojo/gltf-import-export#readme",
   "dependencies": {
-    "yargs": "^11.1.0"
+    "yargs": "^16.2.0"
   },
   "devDependencies": {
-    "@types/node": "^7.10.9",
-    "@types/yargs": "^11.1.3",
-    "tslint": "^5.20.1",
-    "typescript": "^2.9.2"
+    "@types/node": "^7.10.14",
+    "@types/yargs": "^15.0.5",
+    "eslint": "^7.18.0",
+    "typescript": "^4.1.3"
   }
 }
