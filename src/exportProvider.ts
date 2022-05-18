@@ -10,7 +10,9 @@ const gltfMimeTypes: any = {
     'image/webp' : ['webp'],
     'image/vnd-ms.dds' : ['dds'],
     'text/plain' : ['glsl', 'vert', 'vs', 'frag', 'fs', 'txt'],
-    'audio/wav' : ['wav']
+    'audio/wav' : ['wav'],
+    'application/gltf-buffer' : ['glbuf', 'glbin'],
+    'application/octet-stream' : ['bin']
 };
 
 interface IUriData {
@@ -23,11 +25,11 @@ interface IUriData {
  *
  * @param mimeType
  */
-export function guessFileExtension(mimeType: string): string {
+export function guessFileExtension(mimeType: string): { extension: string, found: boolean } {
     if (gltfMimeTypes.hasOwnProperty(mimeType)) {
-        return '.' + gltfMimeTypes[mimeType][0];
+        return { extension: '.' + gltfMimeTypes[mimeType][0], found: true };
     }
-    return '.bin';
+    return { extension: '.bin', found: false };
 }
 
 /**
@@ -48,7 +50,7 @@ export function guessMimeType(filename: string): string {
 }
 
 function isBase64 (uri: string): boolean {
-    return uri.length < 5 ? false : uri.substr(0, 5) === 'data:';
+    return uri.length < 5 ? false : uri.substring(0, 5) === 'data:';
 }
 
 function decodeBase64(uri: string): Buffer {
@@ -70,7 +72,10 @@ function dataFromUri(buffer: any, basePath: string): IUriData | null {
     }
     else {
         const fullUri = decodeURI(Url.resolve(basePath, buffer.uri));
-        const mimeType = guessMimeType(fullUri);
+        let mimeType = buffer.mimeType;
+        if (mimeType == null) {
+            mimeType = guessMimeType(fullUri);
+        }
         return { mimeType: mimeType, buffer: fs.readFileSync(fullUri) };
     }
 }

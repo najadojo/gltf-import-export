@@ -90,7 +90,8 @@ function doConversion(sourceBuf: Buffer, pathBase: string, targetFilename: strin
         const length: number = view.byteLength;
 
         const firstReference = images[0];
-        const extension = guessFileExtension(firstReference.mimeType);
+        const guess = guessFileExtension(firstReference.mimeType);
+        const extension = guess.extension;
         const imageIndex = gltf.images.indexOf(firstReference);
         const filename = targetBasename + '_img' + imageIndex.toString() + extension;
         const buf = getBuffer(gltf, view.buffer, pathBase, binBuffer);
@@ -101,7 +102,9 @@ function doConversion(sourceBuf: Buffer, pathBase: string, targetFilename: strin
 
         images.forEach(image => {
             delete image.bufferView;
-            delete image.mimeType;
+            if (guess.found) {
+                delete image.mimeType;
+            }
             image.uri = path.basename(filename);
         });
     }
@@ -151,7 +154,8 @@ function doConversion(sourceBuf: Buffer, pathBase: string, targetFilename: strin
         const length: number = view.byteLength;
 
         const firstReference = buffers[0];
-        const extension = guessFileExtension(firstReference.buffer.mimeType);
+        const guess = guessFileExtension(firstReference.buffer.mimeType);
+        const extension = guess.extension;
         const filename = targetBasename + '_' + firstReference.name + '_' + bufferViewIndex.toString() + extension;
         const buf = getBuffer(gltf, view.buffer, pathBase, binBuffer);
         if (buf === null) {
@@ -161,7 +165,9 @@ function doConversion(sourceBuf: Buffer, pathBase: string, targetFilename: strin
 
         buffers.forEach(buffer => {
             delete buffer.buffer.bufferView;
-            delete buffer.buffer.mimeType;
+            if (guess.found) {
+                delete buffer.buffer.mimeType;
+            }
             buffer.buffer.uri = path.basename(filename);
         });
     }
