@@ -148,24 +148,27 @@ export function ConvertToGLB(gltf: any, sourceFilename: string, outputFilename: 
     let bufferOffset = 0;
     const outputBuffers: Buffer[] = [];
     let bufferIndex = 0;
-    gltf.buffers = gltf.buffers ?? []
-    // Get current buffers already defined in bufferViews
-    for (; bufferIndex < gltf.buffers.length; bufferIndex++) {
-        const buffer = gltf.buffers[bufferIndex];
-        const data = dataFromUri(buffer, sourceFilename);
-        if (data == null) {
-            continue;
+    if (gltf.buffers) {
+        // Get current buffers already defined in bufferViews
+        for (; bufferIndex < gltf.buffers.length; bufferIndex++) {
+            const buffer = gltf.buffers[bufferIndex];
+            const data = dataFromUri(buffer, sourceFilename);
+            if (data == null) {
+                continue;
+            }
+            outputBuffers.push(data.buffer);
+            delete buffer['uri'];
+            buffer['byteLength'] = data.buffer.length;
+            bufferMap.set(bufferIndex, bufferOffset);
+            bufferOffset += alignedLength(data.buffer.length);
         }
-        outputBuffers.push(data.buffer);
-        delete buffer['uri'];
-        buffer['byteLength'] = data.buffer.length;
-        bufferMap.set(bufferIndex, bufferOffset);
-        bufferOffset += alignedLength(data.buffer.length);
     }
-    gltf.bufferViews = gltf.bufferViews ?? []
-    for (const bufferView of gltf.bufferViews) {
-        bufferView.byteOffset = (bufferView.byteOffset || 0) + bufferMap.get(bufferView.buffer);
-        bufferView.buffer = 0;
+
+    if (gltf.bufferViews) {
+        for (const bufferView of gltf.bufferViews) {
+            bufferView.byteOffset = (bufferView.byteOffset || 0) + bufferMap.get(bufferView.buffer);
+            bufferView.buffer = 0;
+        }
     }
 
     const convertToBufferView = (buffer: any, data: IUriData) => {
@@ -179,6 +182,7 @@ export function ConvertToGLB(gltf: any, sourceFilename: string, outputFilename: 
         bufferIndex++;
         bufferOffset += alignedLength(data.buffer.length);
 
+        gltf.bufferViews = gltf.bufferViews ?? [];
         const bufferViewIndex = gltf.bufferViews.length;
         gltf.bufferViews.push(bufferView);
         outputBuffers.push(data.buffer);

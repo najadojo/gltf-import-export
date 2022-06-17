@@ -253,7 +253,12 @@ function doConversion(sourceBuf: Buffer, pathBase: string, targetFilename: strin
         newBufferView.push(view);
         currentOffset += length;
     }
-    gltf.bufferViews = newBufferView;
+
+    if (newBufferView.length > 0 ) {
+        gltf.bufferViews = newBufferView;
+    } else {
+        delete gltf.bufferViews;
+    }
 
     function getNewBufferViewIndex(oldIndex: number) {
         const newIndex = bufferViewList.indexOf(oldIndex);
@@ -293,11 +298,15 @@ function doConversion(sourceBuf: Buffer, pathBase: string, targetFilename: strin
 
     const binFilename = targetBasename + '_data.bin';
     const finalBuffer = Buffer.concat(bufferDataList);
-    fs.writeFileSync(binFilename, finalBuffer, 'binary');
-    gltf.buffers = [{
-        uri: path.basename(binFilename),
-        byteLength: finalBuffer.length
-    }];
+    if (finalBuffer.length > 0) {
+        fs.writeFileSync(binFilename, finalBuffer, 'binary');
+        gltf.buffers = [{
+            uri: path.basename(binFilename),
+            byteLength: finalBuffer.length
+        }];
+    } else {
+        delete gltf.buffers;
+    }
 
     // write out the final GLTF json and open.
     const gltfString = JSON.stringify(gltf, null, '  ');
