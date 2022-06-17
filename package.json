@@ -1,6 +1,6 @@
 {
   "name": "gltf-import-export",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "description": "Convert between GLB and GLTF files",
   "main": "dist/index.js",
   "bin": "dist/tool.js",
@@ -31,6 +31,7 @@
     "yargs": "^16.2.0"
   },
   "devDependencies": {
+    "jshint": "^2.13.4",
     "@types/node": "^7.10.14",
     "@types/yargs": "^15.0.5",
     "eslint": "^7.18.0",

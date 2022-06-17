@@ -148,6 +148,7 @@ export function ConvertToGLB(gltf: any, sourceFilename: string, outputFilename: 
     let bufferOffset = 0;
     const outputBuffers: Buffer[] = [];
     let bufferIndex = 0;
+    gltf.buffers = gltf.buffers ?? []
     // Get current buffers already defined in bufferViews
     for (; bufferIndex < gltf.buffers.length; bufferIndex++) {
         const buffer = gltf.buffers[bufferIndex];
@@ -161,6 +162,7 @@ export function ConvertToGLB(gltf: any, sourceFilename: string, outputFilename: 
         bufferMap.set(bufferIndex, bufferOffset);
         bufferOffset += alignedLength(data.buffer.length);
     }
+    gltf.bufferViews = gltf.bufferViews ?? []
     for (const bufferView of gltf.bufferViews) {
         bufferView.byteOffset = (bufferView.byteOffset || 0) + bufferMap.get(bufferView.buffer);
         bufferView.buffer = 0;
